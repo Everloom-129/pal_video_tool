@@ -6,7 +6,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="PAL Video Processing Tool")
     parser.add_argument("--input", type=str, required=True, help="Path to input video")
     parser.add_argument("--output", type=str, help="Path to output video")
-    parser.add_argument("--prompts", nargs='+', default=['person', 'car'], help="Detection prompts")
+    parser.add_argument("--prompts", nargs='+', default=['cup', 'robot'], help="Detection prompts")
     return parser.parse_args()
 
 def main():

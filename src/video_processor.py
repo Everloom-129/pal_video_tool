@@ -26,7 +26,7 @@ class VideoProcessor:
             if frame_count % fps == 0:  # Process every second
                 cv2.imwrite('temp_frame.jpg', frame)
                 result = self.api_client.detect_objects('temp_frame.jpg', prompts)
-                detections = self.convert_result_to_detections(result)
+                detections = self.convert_result_to_detections(result, height, width)
                 
                 frame = self.visualizer.annotate_frame(frame, detections)
                 frame = self.visualizer.add_trace(frame, detections, frame_count)
@@ -40,14 +40,25 @@ class VideoProcessor:
         out.release()
         cv2.destroyAllWindows()
 
-    def convert_result_to_detections(self, result):
+    def convert_result_to_detections(self, result, height, width):
         detections = []
         for obj in result.objects:
             mask = self.api_client.rle2rgba(obj.mask)
             mask_np = np.array(mask)
+            
+            # Convert RGBA to grayscale
+            mask_gray = cv2.cvtColor(mask_np, cv2.COLOR_RGBA2GRAY)
+            
+            # Resize mask if necessary
+            if mask_gray.shape != (height, width):
+                mask_gray = cv2.resize(mask_gray, (width, height))
+            
+            # Ensure mask is boolean
+            mask_bool = mask_gray > 0
+            
             detections.append({
                 'bbox': obj.bbox,
-                'mask': mask_np,
+                'mask': mask_bool,
                 'category': obj.category,
                 'score': obj.score
             })
