@@ -16,7 +16,7 @@ def main():
     
     output_path = args.output if args.output else args.input.rsplit('.', 1)[0] + '_gd16.mp4'
     
-    args.prompts = ['robot', 'plate', 'drawer','drawer handle', 'mug']
+    args.prompts = ['robot', 'plate', 'drawer','drawer handle', 'mug','fridge handle','fridge']
 
     start_time = time.time()
     processor.process_video(args.input, output_path, args.prompts)

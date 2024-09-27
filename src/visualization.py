@@ -40,25 +40,19 @@ class Visualizer:
 
         # Annotate bounding boxes
         frame = self.box_annotator.annotate(scene=frame, detections=sv_detections)
-        
         # Add labels manually，TODO support supervision
         for label, box in zip(labels, boxes):
             x1, y1, _, _ = box
             cv2.putText(frame, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
         # Annotate masks
-        frame = self.mask_annotator.annotate(scene=frame, detections=sv_detections)
+        # frame = self.mask_annotator.annotate(scene=frame, detections=sv_detections,color=sv.Color.by_idx(0))
 
         return frame
 
     def add_trace(self, frame: np.ndarray, detections: List[dict], frame_number: int) -> np.ndarray:
         """
         Add motion traces to the frame.
-        
-        :param frame: The input frame to annotate
-        :param detections: List of detection results
-        :param frame_number: Current frame number
-        :return: Frame with motion traces
         """
         if detections:
             boxes = [detection['bbox'] for detection in detections]
@@ -73,8 +67,6 @@ class Visualizer:
         """
         Add a text overlay to the frame.
         
-        :param frame: The input frame
-        :param text: Text to overlay
         :param position: Position of the text (default: top-left corner)
         :return: Frame with text overlay
         """

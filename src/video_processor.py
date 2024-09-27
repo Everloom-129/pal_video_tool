@@ -36,18 +36,20 @@ class VideoProcessor:
                     result = self.api_client.detect_objects('temp_frame.jpg', prompts) # TODO: remove this
                     detections = self.convert_result_to_detections(result, height, width)
                     
-                    frame = self.visualizer.annotate_frame(frame, detections)
-                    # frame = self.visualizer.add_trace(frame, detections, frame_count)
-                    # frame = self.visualizer.add_text_overlay(frame, f"Frame: {frame_count}")
-                    # frame = self.visualizer.create_heatmap(frame, detections)'
-                    out.write(frame)
                 except Exception as e:
                     print(f"Error processing frame {frame_count}: {str(e)}")
                     # If there's an error, we'll just write the original frame
                     pass
-
+            
+            
             # if frame is not None and frame.size > 0:
-                
+            if detections:
+                frame = self.visualizer.annotate_frame(frame, detections)
+                frame = self.visualizer.add_trace(frame, detections, frame_count)
+                frame = self.visualizer.add_text_overlay(frame, f"Frame: {frame_count}")
+                frame = self.visualizer.create_heatmap(frame, detections)
+                # fill the rest of the frames with the last annotated frame
+                out.write(frame)
             # else:
             #     print(f"Warning: Unable to write frame {frame_count}. Skipping.")
 

@@ -12,6 +12,12 @@ input_videos/
 input_video_processed.mp4
 temp_frame.jpg
 
+# Caches and Datasets
+cache/
+data/
+demo/
+
+
 
 # Distribution / packaging
 .Python
@@ -151,6 +157,3 @@ dmypy.json
 # Mac OS
 .DS_Store
 
-# Caches and Datasets
-cache/
-data/
