@@ -45,7 +45,7 @@ class VideoProcessor:
             # if frame is not None and frame.size > 0:
             if detections:
                 frame = self.visualizer.annotate_frame(frame, detections)
-                frame = self.visualizer.add_trace(frame, detections, frame_count)
+                # frame = self.visualizer.add_trace(frame, detections, frame_count)
                 frame = self.visualizer.add_text_overlay(frame, f"Frame: {frame_count}")
                 frame = self.visualizer.create_heatmap(frame, detections)
                 # fill the rest of the frames with the last annotated frame

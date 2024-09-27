@@ -32,7 +32,7 @@ To install the PAL Video Processing Tool, follow these steps:
     conda create -n gd16 python=3.8
     conda activate gd16
     pip install -r requirements.txt
-    cd dds-api # IDEA-Research's SDK repo
+    cd idea-research-api # IDEA-Research's SDK repo
     pip install -e .
     ```
 

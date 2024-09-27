@@ -70,7 +70,9 @@ class Visualizer:
         :param position: Position of the text (default: top-left corner)
         :return: Frame with text overlay
         """
-        return sv.draw_text(scene=frame, text=text, position=position, color=sv.Color.red())
+        # Convert the position tuple to a sv.Point object
+        text_anchor = sv.Point(x=position[0], y=position[1])
+        return sv.draw_text(scene=frame, text=text, text_anchor=text_anchor, text_color=sv.Color.RED)
 
     def highlight_region(self, frame: np.ndarray, region: tuple) -> np.ndarray:
         """
@@ -80,7 +82,7 @@ class Visualizer:
         :param region: Tuple of (x1, y1, x2, y2) coordinates
         :return: Frame with highlighted region
         """
-        return sv.draw_rectangle(scene=frame, rectangle=region, color=sv.Color.yellow())
+        return sv.draw_rectangle(scene=frame, rectangle=region, text_color=sv.Color.YELLOW)
 
     def create_heatmap(self, frame: np.ndarray, detections: List[dict]) -> np.ndarray:
         """
