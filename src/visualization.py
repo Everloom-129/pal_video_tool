@@ -24,6 +24,9 @@ class Visualizer:
         :param detections: List of detection results, each containing 'bbox', 'mask', 'category', and 'score'
         :return: Annotated frame
         """
+        if not detections:
+            return frame
+        
         # Convert detections to supervision Detections format
         boxes = [detection['bbox'] for detection in detections]
         masks = [detection['mask'] for detection in detections]
@@ -35,10 +38,10 @@ class Visualizer:
             class_id=np.arange(len(detections))
         )
 
-        # Annotate bounding boxes and labels
+        # Annotate bounding boxes
         frame = self.box_annotator.annotate(scene=frame, detections=sv_detections)
         
-        # Add labels manually
+        # Add labels manually，TODO support supervision
         for label, box in zip(labels, boxes):
             x1, y1, _, _ = box
             cv2.putText(frame, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
@@ -95,6 +98,9 @@ class Visualizer:
         :param detections: List of detection results
         :return: Heatmap overlay
         """
+        if not detections:
+            return frame
+        
         heatmap = np.zeros(frame.shape[:2], dtype=np.float32)
         for detection in detections:
             x1, y1, x2, y2 = map(int, detection['bbox'])

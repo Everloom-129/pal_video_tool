@@ -1,5 +1,6 @@
-import argparse
 import sys
+import time
+import argparse
 from src.video_processor import VideoProcessor
 
 def parse_arguments():
@@ -13,14 +14,17 @@ def main():
     args = parse_arguments()
     processor = VideoProcessor()
     
-    output_path = args.output if args.output else args.input.rsplit('.', 1)[0] + '_processed.mp4'
+    output_path = args.output if args.output else args.input.rsplit('.', 1)[0] + '_gd16.mp4'
     
-    try:
-        processor.process_video(args.input, output_path, args.prompts)
-        print(f"Processed video saved to {output_path}")
-    except Exception as e:
-        print(f"An error occurred: {str(e)}", file=sys.stderr)
-        sys.exit(1)
+    args.prompts = ['robot', 'plate', 'drawer','drawer handle', 'mug']
+
+    start_time = time.time()
+    processor.process_video(args.input, output_path, args.prompts)
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")
+    
+    print(f"Processed video saved to {output_path}")
+    
 
 if __name__ == "__main__":
     main()

@@ -29,32 +29,34 @@ class VideoProcessor:
             if frame is None or frame.size == 0:
                 print(f"Warning: Empty frame at frame {frame_count}. Skipping.")
                 continue
-
-            if frame_count % fps == 0:  # Process every second
+                
+            if frame_count % 5 == 0:  # 5 fps, but this will cause flickering
                 try:
-                    cv2.imwrite('temp_frame.jpg', frame)
-                    result = self.api_client.detect_objects('temp_frame.jpg', prompts)
+                    cv2.imwrite('temp_frame.jpg', frame) # TODO: remove this
+                    result = self.api_client.detect_objects('temp_frame.jpg', prompts) # TODO: remove this
                     detections = self.convert_result_to_detections(result, height, width)
                     
                     frame = self.visualizer.annotate_frame(frame, detections)
-                    frame = self.visualizer.add_trace(frame, detections, frame_count)
-                    frame = self.visualizer.add_text_overlay(frame, f"Frame: {frame_count}")
-                    frame = self.visualizer.create_heatmap(frame, detections)
+                    # frame = self.visualizer.add_trace(frame, detections, frame_count)
+                    # frame = self.visualizer.add_text_overlay(frame, f"Frame: {frame_count}")
+                    # frame = self.visualizer.create_heatmap(frame, detections)'
+                    out.write(frame)
                 except Exception as e:
                     print(f"Error processing frame {frame_count}: {str(e)}")
                     # If there's an error, we'll just write the original frame
                     pass
 
-            if frame is not None and frame.size > 0:
-                out.write(frame)
-            else:
-                print(f"Warning: Unable to write frame {frame_count}. Skipping.")
+            # if frame is not None and frame.size > 0:
+                
+            # else:
+            #     print(f"Warning: Unable to write frame {frame_count}. Skipping.")
 
             frame_count += 1
 
         cap.release()
         out.release()
-        cv2.destroyAllWindows()
+        print(f"Processed {frame_count} frames")
+        # cv2.destroyAllWindows() # TODO: fix this
 
     def convert_result_to_detections(self, result, height, width):
         detections = []
