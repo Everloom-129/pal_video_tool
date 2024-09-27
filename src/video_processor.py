@@ -10,6 +10,9 @@ class VideoProcessor:
 
     def process_video(self, input_path, output_path, prompts):
         cap = cv2.VideoCapture(input_path)
+        if not cap.isOpened():
+            raise ValueError(f"Could not open video file: {input_path}")
+
         fps = int(cap.get(cv2.CAP_PROP_FPS))
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -23,17 +26,30 @@ class VideoProcessor:
             if not ret:
                 break
 
-            if frame_count % fps == 0:  # Process every second
-                cv2.imwrite('temp_frame.jpg', frame)
-                result = self.api_client.detect_objects('temp_frame.jpg', prompts)
-                detections = self.convert_result_to_detections(result, height, width)
-                
-                frame = self.visualizer.annotate_frame(frame, detections)
-                frame = self.visualizer.add_trace(frame, detections, frame_count)
-                frame = self.visualizer.add_text_overlay(frame, f"Frame: {frame_count}")
-                frame = self.visualizer.create_heatmap(frame, detections)
+            if frame is None or frame.size == 0:
+                print(f"Warning: Empty frame at frame {frame_count}. Skipping.")
+                continue
 
-            out.write(frame)
+            if frame_count % fps == 0:  # Process every second
+                try:
+                    cv2.imwrite('temp_frame.jpg', frame)
+                    result = self.api_client.detect_objects('temp_frame.jpg', prompts)
+                    detections = self.convert_result_to_detections(result, height, width)
+                    
+                    frame = self.visualizer.annotate_frame(frame, detections)
+                    frame = self.visualizer.add_trace(frame, detections, frame_count)
+                    frame = self.visualizer.add_text_overlay(frame, f"Frame: {frame_count}")
+                    frame = self.visualizer.create_heatmap(frame, detections)
+                except Exception as e:
+                    print(f"Error processing frame {frame_count}: {str(e)}")
+                    # If there's an error, we'll just write the original frame
+                    pass
+
+            if frame is not None and frame.size > 0:
+                out.write(frame)
+            else:
+                print(f"Warning: Unable to write frame {frame_count}. Skipping.")
+
             frame_count += 1
 
         cap.release()

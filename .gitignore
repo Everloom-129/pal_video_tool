@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Output files
+output_videos/
+input_videos/
+input_video_processed.mp4
+temp_frame.jpg
+
+
 # Distribution / packaging
 .Python
 build/

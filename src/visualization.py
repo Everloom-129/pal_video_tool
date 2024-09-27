@@ -36,7 +36,12 @@ class Visualizer:
         )
 
         # Annotate bounding boxes and labels
-        frame = self.box_annotator.annotate(scene=frame, detections=sv_detections, labels=labels)
+        frame = self.box_annotator.annotate(scene=frame, detections=sv_detections)
+        
+        # Add labels manually
+        for label, box in zip(labels, boxes):
+            x1, y1, _, _ = box
+            cv2.putText(frame, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
         # Annotate masks
         frame = self.mask_annotator.annotate(scene=frame, detections=sv_detections)
@@ -56,7 +61,7 @@ class Visualizer:
             boxes = [detection['bbox'] for detection in detections]
             sv_detections = sv.Detections(xyxy=np.array(boxes))
             if sv_detections.xyxy.any():
-                frame = self.trace_annotator.annotate(scene=frame, detections=sv_detections, frame_number=frame_number)
+                frame = self.trace_annotator.annotate(scene=frame, detections=sv_detections)
             else:
                 print("No detections to annotate")
         return frame
