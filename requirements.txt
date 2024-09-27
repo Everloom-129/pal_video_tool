@@ -1,0 +1,8 @@
+opencv-python
+numpy
+torch
+torchvision
+supervision
+# dds_cloudapi_sdk # We need to install this package from the local source
+pillow
+python-dotenv
