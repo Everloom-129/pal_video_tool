@@ -64,7 +64,7 @@ class Client:
 
         file_name = os.path.basename(local_path)
         data = {"file_name": file_name}
-        rsp = requests.post(sign_url, json=data, headers=headers, timeout=10)
+        rsp = requests.post(sign_url, json=data, headers=headers, timeout=10) # set longer for US-China communication
         assert rsp.status_code == 200
         rsp_json = rsp.json()
 

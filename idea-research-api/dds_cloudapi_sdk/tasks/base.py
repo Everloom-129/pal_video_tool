@@ -72,7 +72,7 @@ class BaseTask(abc.ABC):
         self.config = config
         self.status = TaskStatus.Triggering
 
-        rsp = requests.post(self.api_trigger_url, json=self.api_body, headers=self.headers, timeout=10)
+        rsp = requests.post(self.api_trigger_url, json=self.api_body, headers=self.headers, timeout=10) # set longer for US-China communication
 
         rsp_json = rsp.json()
         if rsp_json["code"] != 0:
@@ -85,7 +85,7 @@ class BaseTask(abc.ABC):
             raise RuntimeError(f"{self} is not triggered, you can't check it's status")
 
         api = self.api_check_url
-        rsp = requests.get(api, timeout=10, headers=self.headers)
+        rsp = requests.get(api, timeout=10, headers=self.headers) # set longer for US-China communication
         rsp_json = rsp.json()
         if rsp_json["code"] != 0:
             raise RuntimeError(f"Failed to check {self}, error: {rsp_json['msg']}")
