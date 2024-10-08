@@ -1,5 +1,5 @@
 # PAL Video Processing Tool
-- Tony Wang
+- Contributors: Tony Wang
 - 09/25/2024
 ---
 
@@ -37,6 +37,30 @@ To install the PAL Video Processing Tool, follow these steps:
     cd idea-research-api # IDEA-Research's SDK repo
     pip install -e .
     ```
+4. Obtain API token from [`IDEA-Research`](https://cloud.deepdataspace.com/dashboard/api-quota) and set it in the environment variable:
+    **Option 1: Temporarily set the API key**
+
+    This method sets the API key only for the current terminal session.
+
+    ```sh
+    export DDS_CLOUDAPI_TEST_TOKEN='YOUR_API_KEY'
+    ```
+
+    **Option 2: Permanently add the API key to your `.bashrc` file**
+
+    This method ensures the API key is set every time you open a new terminal session.
+
+      ```sh
+      echo "export DDS_CLOUDAPI_TEST_TOKEN='2681bf4c'" >> ~/.bashrc
+      ```
+
+    Reload the terminal to apply the changes:
+
+      ```sh
+      source ~/.bashrc
+      ```
+
+    **Note**: Remember to replace `'YOUR_API_KEY'` with your actual API key.
 
 ## Usage
 
@@ -51,7 +75,7 @@ python main.py --input <input_video> --output <output_video> --prompts <detectio
 
 Welcome suggestions! Please raise any issue / PR if you are interested in it.
 - [ ] Add more scripts for detection
-- [ ] Add more scripts for segmentation
+- [x] Add more scripts for segmentation
 - [ ] Add more scripts for visualization
 
 ## License

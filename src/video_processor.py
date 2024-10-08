@@ -7,7 +7,8 @@ class VideoProcessor:
     def __init__(self):
         self.api_client = APIClient()
         self.visualizer = Visualizer()
-
+        self.frame_skip = 10 # Process every 10th frame, adjust as needed
+        
     def process_video(self, input_path, output_path, prompts):
         cap = cv2.VideoCapture(input_path)
         if not cap.isOpened():
@@ -30,7 +31,8 @@ class VideoProcessor:
                 print(f"Warning: Empty frame at frame {frame_count}. Skipping.")
                 continue
                 
-            if frame_count % 5 == 0:  # 5 fps, but this will cause flickering
+                # TODO: better way to set this?
+            if frame_count % self.frame_skip == 0:  # 3 fps, but this will cause flickering
                 try:
                     cv2.imwrite('temp_frame.jpg', frame) # TODO: remove this
                     result = self.api_client.detect_objects('temp_frame.jpg', prompts) # TODO: remove this
