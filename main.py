@@ -8,6 +8,7 @@ def parse_arguments():
     parser.add_argument("--input", type=str, required=True, help="Path to input video")
     parser.add_argument("--output", type=str, help="Path to output video")
     parser.add_argument("--prompts", nargs='+', default=['cup', 'robot'], help="Detection prompts")
+
     return parser.parse_args()
 
 def main():
@@ -15,8 +16,9 @@ def main():
     processor = VideoProcessor()
     
     output_path = args.output if args.output else args.input.rsplit('.', 1)[0] + '_gd16.mp4'
-    
-    args.prompts = ['robot', 'plate', 'drawer','drawer handle', 'mug','fridge handle','fridge']
+    # debug
+    if 0: 
+        args.prompts = ['robot', 'plate', 'drawer','drawer handle', 'mug','fridge handle','fridge']
 
     start_time = time.time()
     processor.process_video(args.input, output_path, args.prompts)

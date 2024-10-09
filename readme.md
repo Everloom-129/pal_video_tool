@@ -11,9 +11,9 @@ This tool is designed for use in the PAL lab to annotate video, particularly for
 
 - [x] **Object Detection with Text**: Collabrating with `IDEA-Research`, this library use the SOTA Openset Detection Model: `Grounding DINO Series` to detect objects in the video and overlays text annotations. With API access, this tool is light weight, easy to use and solely built for PAL Lab members. 
 
-- [ ] **Masking with Grounded SAM**: With API access to `IDEA-Research`, this tool is able to render masks with `Grounding SAM` to specific objects or regions within the video. 
+- [X] **Masking with Grounded SAM**: With API access to `IDEA-Research`, this tool is able to render masks with `Grounding SAM` to specific objects or regions within the video. 
 
-- [ ] **Video Masking**: With `Segment Anything 2`, the tool can render masks to specific objects or regions within the video.
+- [x] **Video Masking**: With `Segment Anything 2`, the tool can render masks to specific objects or regions within the video.
 
 - [ ] **Fancy Visualization**: With `Supervision`, more advanced visualization techniques to enhance the presentation of video content, to be developed...
 
