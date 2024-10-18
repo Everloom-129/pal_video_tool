@@ -39,83 +39,35 @@ class VideoSAM2:
         self.inference_state = None
         self.video_segments = {}
 
-    def load_video(self, video_path):
-        self.video_path = video_path
-        self.cap = cv2.VideoCapture(video_path)
-        self.frame_count = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
-        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    def load_video(self, video_dir):
+        self.inference_state = self.predictor.init_state(video_path=video_dir)
 
-    def add_points(self, frame_idx, points, labels):
-        
-        ret, frame = self.cap.read()
-        if not ret:
-            raise ValueError(f"Could not read frame {frame_idx}")
-        
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(frame)
-        
-        self.inference_state = self.model.add_points(
-            self.inference_state,
-            image,
-            np.array(points),
-            np.array(labels),
-            frame_idx
+    def add_object(self, frame_idx, obj_id, points=None, labels=None, box=None):
+        _, out_obj_ids, out_mask_logits = self.predictor.add_new_points_or_box(
+            inference_state=self.inference_state,
+            frame_idx=frame_idx,
+            obj_id=obj_id,
+            points=points,
+            labels=labels,
+            box=box
         )
-
-    def add_box(self, frame_idx, box):
-        if self.inference_state is None:
-            self.inference_state = self.model.get_inference_state()
-        
-        ret, frame = self.cap.read()
-        if not ret:
-            raise ValueError(f"Could not read frame {frame_idx}")
-        
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(frame)
-        
-        self.inference_state = self.model.add_box(
-            self.inference_state,
-            image,
-            np.array(box),
-            frame_idx
-        )
+        return out_obj_ids, out_mask_logits
 
     def propagate(self):
-        self.video_segments = {}
-        for out_frame_idx, out_obj_ids, out_mask_logits in self.model.propagate_in_video(self.inference_state):
+        for out_frame_idx, out_obj_ids, out_mask_logits in self.predictor.propagate_in_video():
             self.video_segments[out_frame_idx] = {
                 out_obj_id: (out_mask_logits[i] > 0.0).cpu().numpy()
                 for i, out_obj_id in enumerate(out_obj_ids)
             }
 
-    def visualize(self, stride=30):
-        plt.close("all")
-        for frame_idx in range(0, self.frame_count, stride):
-            if frame_idx not in self.video_segments:
-                continue
-            
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
-            ret, frame = self.cap.read()
-            if not ret:
-                continue
-            
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            
-            plt.figure(figsize=(6, 4))
-            plt.title(f"frame {frame_idx}")
-            plt.imshow(frame)
-            
-            for obj_id, mask in self.video_segments[frame_idx].items():
-                show_mask(mask, plt.gca(), obj_id=obj_id)
-            
-            plt.show()
+    def get_segments(self):
+        return self.video_segments
 
-    def __del__(self):
-        if hasattr(self, 'cap'):
-            self.cap.release()
+    def reset(self):
+        self.predictor.reset_state()
+        self.video_segments = {}
 
+# segments = predictor.get_segments()
 if __name__ == "__main__":
     video_sam2 = VideoSAM2()
     video_sam2.load_video("demo/HODOR_23.mp4")

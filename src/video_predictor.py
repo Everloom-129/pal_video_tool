@@ -63,7 +63,7 @@ def show_box(box, ax):
 
 
 # `video_dir` a directory of JPEG frames with filenames like `<frame_index>.jpg`
-video_dir = "./videos/bedroom"
+video_dir = "./demo/"
 
 # scan all the JPEG frame names in this directory
 frame_names = [
@@ -119,7 +119,7 @@ points = np.array([[210, 350]], dtype=np.float32)
 # for labels, `1` means positive click and `0` means negative click
 labels = np.array([1], np.int32)
 _, out_obj_ids, out_mask_logits = predictor.add_new_points_or_box(
-    =,
+    inference_state=inference_state,
     frame_idx=ann_frame_idx,
     obj_id=ann_obj_id,
     points=points,
@@ -153,7 +153,7 @@ points = np.array([[210, 350], [250, 220]], dtype=np.float32)
 # for labels, `1` means positive click and `0` means negative click
 labels = np.array([1, 1], np.int32)
 _, out_obj_ids, out_mask_logits = predictor.add_new_points_or_box(
-    =,
+    inference_state=inference_state,
     frame_idx=ann_frame_idx,
     obj_id=ann_obj_id,
     points=points,
@@ -218,7 +218,7 @@ points = np.array([[82, 410]], dtype=np.float32)
 # for labels, `1` means positive click and `0` means negative click
 labels = np.array([0], np.int32)
 _, _, out_mask_logits = predictor.add_new_points_or_box(
-    =,
+    inference_state=inference_state,
     frame_idx=ann_frame_idx,
     obj_id=ann_obj_id,
     points=points,
@@ -281,7 +281,7 @@ ann_obj_id = 4  # give a unique id to each object we interact with (it can be an
 # Let's add a box at (x_min, y_min, x_max, y_max) = (300, 0, 500, 400) to get started
 box = np.array([300, 0, 500, 400], dtype=np.float32)
 _, out_obj_ids, out_mask_logits = predictor.add_new_points_or_box(
-    =,
+    inference_state=inference_state,
     frame_idx=ann_frame_idx,
     obj_id=ann_obj_id,
     box=box,
@@ -313,7 +313,7 @@ labels = np.array([1], np.int32)
 # the new refinement click together into `add_new_points_or_box`
 box = np.array([300, 0, 500, 400], dtype=np.float32)
 _, out_obj_ids, out_mask_logits = predictor.add_new_points_or_box(
-    =,
+    inference_state=inference_state,
     frame_idx=ann_frame_idx,
     obj_id=ann_obj_id,
     points=points,
@@ -389,7 +389,7 @@ points = np.array([[200, 300]], dtype=np.float32)
 labels = np.array([1], np.int32)
 prompts[ann_obj_id] = points, labels
 _, out_obj_ids, out_mask_logits = predictor.add_new_points_or_box(
-    =,
+    inference_state=inference_state,
     frame_idx=ann_frame_idx,
     obj_id=ann_obj_id,
     points=points,
@@ -420,7 +420,7 @@ points = np.array([[200, 300], [275, 175]], dtype=np.float32)
 labels = np.array([1, 0], np.int32)
 prompts[ann_obj_id] = points, labels
 _, out_obj_ids, out_mask_logits = predictor.add_new_points_or_box(
-    =,
+    inference_state=inference_state,
     frame_idx=ann_frame_idx,
     obj_id=ann_obj_id,
     points=points,
@@ -456,7 +456,7 @@ prompts[ann_obj_id] = points, labels
 
 # `add_new_points_or_box` returns masks for all objects added so far on this interacted frame
 _, out_obj_ids, out_mask_logits = predictor.add_new_points_or_box(
-    =,
+    inference_state=inference_state,
     frame_idx=ann_frame_idx,
     obj_id=ann_obj_id,
     points=points,
