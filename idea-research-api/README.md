@@ -2,7 +2,7 @@
 
 For the demo, please refer to the [demo](demo) folder.
 
-this repo is forked from [IDEA-Research's SDK](https://github.com/idea-research/dds-cloudapi-sdk)
+this repo is forked from [IDEA-Research's SDK](https://github.com/deepdataspace/dds-cloudapi-sdk)
 
 Modified the code to fit the PAL pipeline.
 

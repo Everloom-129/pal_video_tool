@@ -7,6 +7,8 @@ __pycache__/
 *.so
 
 # Output files
+output/
+checkpoints/
 output_videos/
 input_videos/
 input_video_processed.mp4

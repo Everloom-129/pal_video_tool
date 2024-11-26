@@ -3,6 +3,6 @@ numpy
 torch
 torchvision
 supervision
-# dds_cloudapi_sdk # We need to install this package from the local source
+dds_cloudapi_sdk 
 pillow
 python-dotenv

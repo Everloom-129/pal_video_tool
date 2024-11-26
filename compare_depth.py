@@ -6,8 +6,11 @@ import torch
 import time
 import pdb
 import warnings
+import os
 
 warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", message=".*weights_only=False.*")
 
 def check_nan(data: np.ndarray):
     if np.isnan(data).any():
@@ -23,7 +26,7 @@ def get_torch_device():
 def get_model_depth(image_path, output_path):
     # Load model and preprocessing transform
     print("Loading model...")
-    model, transform = depth_pro.@(
+    model, transform = depth_pro.create_model_and_transforms(
         device=get_torch_device(),
         precision=torch.half,
     )
@@ -34,7 +37,7 @@ def get_model_depth(image_path, output_path):
         # Load and preprocess image
         image, _, f_px = depth_pro.load_rgb(image_path)
         image = transform(image)
-        
+        real_f_px = torch.tensor(607.5303)
         # Run inference
         prediction = model.infer(image, f_px=f_px)
         print(f"Shape of depth: {prediction['depth'].shape}")
@@ -59,9 +62,8 @@ def align_depth_to_rgb(depth_image, rgb_shape):
     RGB FOV: 69.4° x 42.5° x 77° (H × V × D)
     Depth FOV: 87° x 58° x 95° (H × V × D)
     """
-    # FOV ratio between depth camera and RGB camera
-    h_ratio = 69 / 87.0
-    v_ratio = 42 / 58.0
+    h_ratio = 69.4 / 87.0  # 更精确的水平比例
+    v_ratio = 42.5 / 58.0  # 更精确的垂直比例
     
     # Calculate crop region
     h_margin = int((depth_image.shape[1] - depth_image.shape[1] * h_ratio) / 2)
@@ -75,21 +77,50 @@ def align_depth_to_rgb(depth_image, rgb_shape):
     
     return aligned_depth
 
-def load_and_compare_depths():
+def find_optimal_scale(pred_depth, gt_depth, valid_mask):
+    """
+    Find optimal scale factor to minimize L1 error between prediction and ground truth
+    Args:
+        pred_depth: predicted depth map
+        gt_depth: ground truth depth map
+        valid_mask: boolean mask for valid depth values
+    Returns:
+        optimal scale factor
+    """
+    # Only consider valid depth values
+    pred_valid = pred_depth[valid_mask]
+    gt_valid = gt_depth[valid_mask]
+    
+    # Solve for scale factor that minimizes L1 error
+    # scale * pred = gt
+    # scale = median(gt / pred) is optimal for L1
+    scale = np.median(gt_valid / pred_valid)
+    
+    print(f"Optimal scale factor: {scale:.3f}")
+    return scale
+
+def load_and_compare_depths(input_dir='data/disp/small-obj-3', output_dir='output', image_name='color_3.png'):
+    # Create output directories
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(f'{output_dir}/depth_analysis', exist_ok=True)
+    
     # Load images
-    image_name = 'color_water-1-3.png'
-    rgbd_depth = np.load(f'input/depth_{image_name[6:-4]}.npy')
-    rgb_img = cv2.imread(f'input/{image_name}')
+    rgbd_depth = np.load(f'{input_dir}/depth_{image_name[6:-4]}.npy')
+    rgb_img = cv2.imread(f'{input_dir}/{image_name}')
     rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_BGR2RGB)
     
     # Align depth map to RGB perspective
     rgbd_depth_aligned = align_depth_to_rgb(rgbd_depth, rgb_img.shape)
     
-    depth_pro_depth = get_model_depth(f'input/{image_name}', f'output/dp_{image_name.split(".")[0]}.npy') *1000
-    # import pdb; pdb.set_trace()
+    depth_pro_depth = get_model_depth(f'{input_dir}/{image_name}', f'{output_dir}/dp_{image_name.split(".")[0]}.npy')
     
-    print(f"DepthPro depth range: {depth_pro_depth.min():.2f} - {depth_pro_depth.max():.2f}")
-    if check_nan(depth_pro_depth):
+    # Find and apply optimal scale
+    valid_mask = rgbd_depth_aligned > 0
+    scale = find_optimal_scale(depth_pro_depth, rgbd_depth_aligned, valid_mask)
+    depth_pro_depth_scaled = depth_pro_depth * scale
+    
+    print(f"DepthPro depth range: {depth_pro_depth_scaled.min():.2f} - {depth_pro_depth_scaled.max():.2f}")
+    if check_nan(depth_pro_depth_scaled):
         print("Warning: DepthPro depth contains NaN values")
     
 
@@ -110,14 +141,13 @@ def load_and_compare_depths():
     
     # Scaled DepthPro depth map
     plt.subplot(233)
-    plt.imshow(depth_pro_depth, cmap='viridis')
+    plt.imshow(depth_pro_depth_scaled, cmap='viridis')
     plt.colorbar(label='Depth (mm)')
-    plt.title('DepthPro Depth')
+    plt.title('DepthPro Depth (L1 Optimized)')
     plt.axis('off')
     
-    # Calculate depth differences after alignment
-    valid_mask = rgbd_depth_aligned > 0
-    depth_diff = np.abs(rgbd_depth_aligned - depth_pro_depth)
+    # Calculate depth differences using scaled prediction
+    depth_diff = np.abs(rgbd_depth_aligned - depth_pro_depth_scaled)
     depth_diff[~valid_mask] = 0
     
     # Display difference map
@@ -129,7 +159,7 @@ def load_and_compare_depths():
     
     # Statistics (considering only valid depth values)
     valid_rgbd = rgbd_depth_aligned[valid_mask]
-    valid_depth_pro = depth_pro_depth[valid_mask]
+    valid_depth_pro = depth_pro_depth_scaled[valid_mask]
     
     rmse, rel_error = calculate_metrics(valid_rgbd, valid_depth_pro, valid_mask)
 
@@ -150,8 +180,11 @@ def load_and_compare_depths():
     plt.legend()
     
     plt.tight_layout()
+    plt.title(f'Depth Analysis on {input_dir}/{image_name} ')
     # Save figure instead of showing it
-    plt.savefig(f'./depth_analysis/depth_comparison_{time.strftime("%Y%m%d_%H%M%S")}.png')
+    plt.savefig(f'{output_dir}/depth_analysis/graph_{time.strftime("%m%d_%H%M")}.png')
+    print(f"\033[95mProcessing completed. Graph saved to {output_dir}/depth_analysis/graph_{time.strftime('%m%d_%H%M')}.png\033[0m")
+
     plt.close()
 
 def calculate_metrics(rgbd, depth_pro, valid_mask):
