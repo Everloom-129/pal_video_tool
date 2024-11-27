@@ -7,7 +7,7 @@ import time
 import pdb
 import warnings
 import os
-
+import argparse
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", message=".*weights_only=False.*")
@@ -49,10 +49,10 @@ def get_model_depth(image_path, output_path):
         # Save depth image
         np.save(output_path, depth_cpu)
         
-        print(f"Depth statistics:")
-        print(f"Min depth: {depth_cpu.min():.2f}mm")
-        print(f"Max depth: {depth_cpu.max():.2f}mm") 
-        print(f"Mean depth: {depth_cpu.mean():.2f}mm")
+        # print(f"Depth statistics:")
+        # print(f"Min depth: {depth_cpu.min():.2f}mm")
+        # print(f"Max depth: {depth_cpu.max():.2f}mm") 
+        # print(f"Mean depth: {depth_cpu.mean():.2f}mm")
     print(f"\033[95mProcessing completed. Depth saved to {output_path}\033[0m")
     return depth_cpu
 
@@ -62,8 +62,8 @@ def align_depth_to_rgb(depth_image, rgb_shape):
     RGB FOV: 69.4° x 42.5° x 77° (H × V × D)
     Depth FOV: 87° x 58° x 95° (H × V × D)
     """
-    h_ratio = 69.4 / 87.0  # 更精确的水平比例
-    v_ratio = 42.5 / 58.0  # 更精确的垂直比例
+    h_ratio = 69.4 / 87.0  
+    v_ratio = 42.5 / 58.0  
     
     # Calculate crop region
     h_margin = int((depth_image.shape[1] - depth_image.shape[1] * h_ratio) / 2)
@@ -71,23 +71,13 @@ def align_depth_to_rgb(depth_image, rgb_shape):
     
     # Crop depth image
     cropped_depth = depth_image[v_margin:-v_margin, h_margin:-h_margin]
-    
     # Resize to RGB image size
     aligned_depth = cv2.resize(cropped_depth, (rgb_shape[1], rgb_shape[0]))
     
     return aligned_depth
 
 def find_optimal_scale(pred_depth, gt_depth, valid_mask):
-    """
-    Find optimal scale factor to minimize L1 error between prediction and ground truth
-    Args:
-        pred_depth: predicted depth map
-        gt_depth: ground truth depth map
-        valid_mask: boolean mask for valid depth values
-    Returns:
-        optimal scale factor
-    """
-    # Only consider valid depth values
+    # filter points
     pred_valid = pred_depth[valid_mask]
     gt_valid = gt_depth[valid_mask]
     
@@ -99,7 +89,7 @@ def find_optimal_scale(pred_depth, gt_depth, valid_mask):
     print(f"Optimal scale factor: {scale:.3f}")
     return scale
 
-def load_and_compare_depths(input_dir='data/disp/small-obj-3', output_dir='output', image_name='color_3.png'):
+def load_and_compare_depths(input_dir='data/disp/small-obj-2', output_dir='output', image_name='color_2.png'):
     # Create output directories
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(f'{output_dir}/depth_analysis', exist_ok=True)
@@ -119,43 +109,52 @@ def load_and_compare_depths(input_dir='data/disp/small-obj-3', output_dir='outpu
     scale = find_optimal_scale(depth_pro_depth, rgbd_depth_aligned, valid_mask)
     depth_pro_depth_scaled = depth_pro_depth * scale
     
-    print(f"DepthPro depth range: {depth_pro_depth_scaled.min():.2f} - {depth_pro_depth_scaled.max():.2f}")
     if check_nan(depth_pro_depth_scaled):
         print("Warning: DepthPro depth contains NaN values")
     
+    # Create a directory for individual plots
+    plot_dir = f'{output_dir}/depth_analysis/{image_name.split(".")[0]}'
+    os.makedirs(plot_dir, exist_ok=True)
+    timestamp = time.strftime("%m%d_%H%M")
 
-    plt.figure(figsize=(15, 10))
-    
     # RGB image
-    plt.subplot(231)
+    plt.figure(figsize=(8, 6))
     plt.imshow(rgb_img)
     plt.title('RGB Image')
     plt.axis('off')
+    plt.savefig(f'{plot_dir}/rgb_{timestamp}.png')
+    plt.close()
     
     # Aligned RGBD depth map
-    plt.subplot(232)
+    plt.figure(figsize=(8, 6))
     plt.imshow(rgbd_depth_aligned, cmap='viridis')
     plt.colorbar(label='Depth (mm)')
     plt.title('Aligned RGBD Depth')
     plt.axis('off')
+    plt.savefig(f'{plot_dir}/rgbd_depth_{timestamp}.png')
+    plt.close()
     
     # Scaled DepthPro depth map
-    plt.subplot(233)
+    plt.figure(figsize=(8, 6))
     plt.imshow(depth_pro_depth_scaled, cmap='viridis')
     plt.colorbar(label='Depth (mm)')
     plt.title('DepthPro Depth (L1 Optimized)')
     plt.axis('off')
+    plt.savefig(f'{plot_dir}/depth_pro_{timestamp}.png')
+    plt.close()
     
     # Calculate depth differences using scaled prediction
     depth_diff = np.abs(rgbd_depth_aligned - depth_pro_depth_scaled)
     depth_diff[~valid_mask] = 0
     
     # Display difference map
-    plt.subplot(234)
+    plt.figure(figsize=(8, 6))
     plt.imshow(depth_diff, cmap='hot')
     plt.colorbar(label='Depth Difference (mm)')
     plt.title('Depth Difference')
     plt.axis('off')
+    plt.savefig(f'{plot_dir}/depth_diff_{timestamp}.png')
+    plt.close()
     
     # Statistics (considering only valid depth values)
     valid_rgbd = rgbd_depth_aligned[valid_mask]
@@ -163,33 +162,44 @@ def load_and_compare_depths(input_dir='data/disp/small-obj-3', output_dir='outpu
     
     rmse, rel_error = calculate_metrics(valid_rgbd, valid_depth_pro, valid_mask)
 
-    print(f"RGBD Depth range: {valid_rgbd.min():.3f} to {valid_rgbd.max():.3f}")
-    print(f" DepthPro range: {valid_depth_pro.min():.3f} to {valid_depth_pro.max():.3f}")
-    print(f"Mean absolute difference: {np.mean(depth_diff[valid_mask]):.3f}")
-    print(f"Max absolute difference: {np.max(depth_diff[valid_mask]):.3f}")
-    print(f"RMSE: {rmse:.3f}")
-    print(f"Relative Error: {rel_error:.3f}")
+    print(f"- RGBD Depth range: {valid_rgbd.min():.3f} to {valid_rgbd.max():.3f}")
+    print(f"- DepthPro range: {valid_depth_pro.min():.3f} to {valid_depth_pro.max():.3f}")
+    print(f"- Mean absolute difference: {np.mean(depth_diff[valid_mask]):.3f}")
+    print(f"- Max absolute difference: {np.max(depth_diff[valid_mask]):.3f}")
+    print(f"- RMSE: {rmse:.3f}")
+    print(f"- Relative Error: {rel_error:.3f}")
     
     # Depth distribution histogram
-    plt.subplot(235)
+    plt.figure(figsize=(8, 6))
     plt.hist(valid_rgbd.flatten(), bins=50, alpha=0.5, label='RGBD')
     plt.hist(valid_depth_pro.flatten(), bins=50, alpha=0.5, label='DepthPro')
     plt.xlabel('Depth (mm)')
     plt.ylabel('Frequency')
     plt.title('Depth Distribution')
     plt.legend()
+    plt.savefig(f'{plot_dir}/depth_dist_{timestamp}.png')
+    plt.close()
+
+    # Create combined visualization
+    plt.figure(figsize=(15, 10))
+    plt.suptitle(f'Depth Analysis on {input_dir}/{image_name}')
+    
+    # Load and display all saved plots
+    for i, name in enumerate(['rgb', 'rgbd_depth', 'depth_pro', 'depth_diff', 'depth_dist']):
+        img = plt.imread(f'{plot_dir}/{name}_{timestamp}.png')
+        plt.subplot(2, 3, i+1)
+        plt.imshow(img)
+        plt.axis('off')
     
     plt.tight_layout()
-    plt.title(f'Depth Analysis on {input_dir}/{image_name} ')
-    # Save figure instead of showing it
-    plt.savefig(f'{output_dir}/depth_analysis/graph_{time.strftime("%m%d_%H%M")}.png')
-    print(f"\033[95mProcessing completed. Graph saved to {output_dir}/depth_analysis/graph_{time.strftime('%m%d_%H%M')}.png\033[0m")
-
+    plt.savefig(f'{output_dir}/depth_analysis/combined_graph_{timestamp}.png')
+    print(f"\033[95mProcessing completed. Individual plots saved to {plot_dir}/\033[0m")
+    print(f"\033[95mCombined graph saved to {output_dir}/depth_analysis/combined_graph_{timestamp}.png\033[0m")
     plt.close()
 
 def calculate_metrics(rgbd, depth_pro, valid_mask):
     # Since rgbd and depth_pro are already masked arrays when passed in
-    # we don't need to apply the mask again
+    # we don't need to apply the mask again！
     rmse = np.sqrt(np.mean((rgbd - depth_pro)**2))
     rel_error = np.mean(np.abs(rgbd - depth_pro) / rgbd)
     
@@ -202,4 +212,12 @@ def calculate_metrics(rgbd, depth_pro, valid_mask):
     return rmse, rel_error
 
 if __name__ == "__main__":
-    load_and_compare_depths()
+    parser = argparse.ArgumentParser(description='Compare depth maps from RGBD and DepthPro')
+    parser.add_argument('--input_dir', type=str, required=False, help='Directory containing input images')
+    parser.add_argument('--output_dir', type=str, required=False, help='Directory to save output files')
+    parser.add_argument('--image_name', type=str, required=False, help='Name of the image file to process')
+    args = parser.parse_args()
+    args.input_dir = 'data/disp/small-obj-3'
+    args.output_dir = 'output'
+    args.image_name = 'color_3.png'
+    load_and_compare_depths(input_dir=args.input_dir, output_dir=args.output_dir, image_name=args.image_name)
