@@ -108,5 +108,8 @@ if __name__ == "__main__":
     input_dir = "data/Franka/varied"
     output_dir = f"output/Franka/varied_1230/"
     for image_path in os.listdir(input_dir):
-        process_image(os.path.join(input_dir, image_path), output_dir)
+        if i % 30 == 0:
+            process_image(os.path.join(input_dir, image_path), output_dir)
+        i += 1
+
 
