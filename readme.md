@@ -17,6 +17,8 @@ This tool is designed for use in the PAL lab to annotate video, particularly for
 
 - [ ] **Fancy Visualization**: With `Supervision`, more advanced visualization techniques to enhance the presentation of video content, to be developed...
 
+- [x] **Depth Estimation**: With `ml-depth-pro`, the tool can estimate the depth of given image sequence and analyze results.
+
 ## Installation
 
 To install the PAL Video Processing Tool, follow these steps:
@@ -31,10 +33,11 @@ To install the PAL Video Processing Tool, follow these steps:
     ```
 3. Install the required dependencies in conda environment:
     ```sh
-    conda create -n gd16 python=3.8
-    conda activate gd16
+    conda create -n pal_video_tool python=3.9
+    conda activate pal_video_tool
     pip install -r requirements.txt
-    cd idea-research-api # IDEA-Research's SDK repo
+    <!-- cd idea-research-api # IDEA-Research's SDK repo Removed with fixed PR now -->
+    cd ml-depth-pro
     pip install -e .
     ```
 4. Obtain API token from [`IDEA-Research`](https://cloud.deepdataspace.com/dashboard/api-quota) and set it in the environment variable:
@@ -81,6 +84,15 @@ Welcome suggestions! Please raise any issue / PR if you are interested in it.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+
+
+## Dependencies
+
+This project uses `ml-depth-pro` AND `Segment Anything 2` as submodule. After cloning, initialize the submodule:
+
+```sh
+git submodule update --init --recursive
+```
 
 ## Contact
 For any questions or feedback, please contact the PAL lab team at `tonyw3@seas.upenn.edu`

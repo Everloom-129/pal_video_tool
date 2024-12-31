@@ -105,8 +105,13 @@ if __name__ == "__main__":
     # input_path = "/home/tonyw/VLM/pal_video_tool/ml-depth-pro/data/disp/water-2/rgb/image.png"
     # output_dir = "output"
     # process_image(input_path, output_dir)
-    input_dir = "data/Koch_images/Koch_1210"
-    output_dir = f"output/Koch_1210/"
+    # input_dir = "data/Koch_images/Koch_1210"
+    input_dir = '/home/franka/R2D2_llm/processed_data/2024-12-09/12'
+    output_dir = f"output/Franka_12-09/"
+    i = 0
     for image_path in os.listdir(input_dir):
-        process_image(os.path.join(input_dir, image_path), output_dir)
+        if i % 30 == 0:
+            process_image(os.path.join(input_dir, image_path), output_dir)
+        i += 1
+
 
