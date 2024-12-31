@@ -82,10 +82,10 @@ def process_image(image_path, output_dir):
         # Save depth visualization as a single clean image
         plt.figure(figsize=(8, 6))
         plt.imshow(depth_resized, cmap='turbo')
-        plt.axis('off')  # 完全关闭坐标轴
-        plt.gca().set_position([0, 0, 1, 1])  # 使图像填充整个画布
+        plt.axis('off')  
+        plt.gca().set_position([0, 0, 1, 1])  # Make image fill the entire canvas
         depth_only_path = os.path.join(output_dir, f'depth_{date}_{image_name}.png')
-        plt.savefig(depth_only_path, bbox_inches='tight', pad_inches=0)  # 移除所有边距
+        plt.savefig(depth_only_path, bbox_inches='tight', pad_inches=0)  # Remove all margins
         plt.close()
 
 
@@ -105,8 +105,8 @@ if __name__ == "__main__":
     # input_path = "/home/tonyw/VLM/pal_video_tool/ml-depth-pro/data/disp/water-2/rgb/image.png"
     # output_dir = "output"
     # process_image(input_path, output_dir)
-    input_dir = "data/Koch_images/Koch_1210"
-    output_dir = f"output/Koch_1210/"
+    input_dir = "data/Franka/varied"
+    output_dir = f"output/Franka/varied_1230/"
     for image_path in os.listdir(input_dir):
         process_image(os.path.join(input_dir, image_path), output_dir)
 
