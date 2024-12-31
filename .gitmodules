@@ -4,3 +4,6 @@
 [submodule "ml-depth-pro"]
 	path = ml-depth-pro
 	url = https://github.com/apple/ml-depth-pro.git
+[submodule "on-wrist-camera-tool"]
+	path = on-wrist-camera-tool
+	url = https://github.com/Everloom-129/on-wrist-camera-tool.git
