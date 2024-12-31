@@ -6,3 +6,4 @@ supervision
 dds_cloudapi_sdk 
 pillow
 python-dotenv
+pandas
