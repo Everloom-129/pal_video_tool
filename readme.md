@@ -67,12 +67,27 @@ To install the PAL Video Processing Tool, follow these steps:
 
 ## Usage
 
-To use the tool, run the following command:
+### Grounding DINO for video
+To use video processing tool, run the following command:
 
 ```sh
 python main.py --input <input_video> --output <output_video> --prompts <detection_prompts> #Optional, default output video will be <input_video_name>_pal.mp4
 ```
 
+### DepthPro for images
+
+#### run DepthPro for a dir of images
+```sh
+# first set the  input_dir and output_dir in main func
+python generate_depth.py 
+```
+#### Compare depth maps from RGBD and DepthPro
+```sh
+python generate_depth.py --input_dir <images_dir> --output_dir <your_dir> --image_name <for rename>
+# you can also directly modify the main func for quick update
+```
+
+Please read functions' docstring for more information.
 
 ## Contributing
 
