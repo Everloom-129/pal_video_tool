@@ -217,7 +217,8 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', type=str, required=False, help='Directory to save output files')
     parser.add_argument('--image_name', type=str, required=False, help='Name of the image file to process')
     args = parser.parse_args()
-    args.input_dir = 'data/disp/small-obj-3'
-    args.output_dir = 'output'
-    args.image_name = 'color_3.png'
+    # Quick test
+    # args.input_dir = 'data/disp/small-obj-3'
+    # args.output_dir = 'output'
+    # args.image_name = 'color_3.png'
     load_and_compare_depths(input_dir=args.input_dir, output_dir=args.output_dir, image_name=args.image_name)
