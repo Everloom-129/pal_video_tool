@@ -19,8 +19,8 @@ cache/
 data/
 demo/
 sam2/
-
-
+outputs/
+DINO-X-API/
 
 # Distribution / packaging
 .Python
