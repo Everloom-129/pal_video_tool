@@ -7,3 +7,6 @@
 [submodule "on-wrist-camera-tool"]
 	path = on-wrist-camera-tool
 	url = https://github.com/Everloom-129/on-wrist-camera-tool.git
+[submodule "omni_depth"]
+	path = omni_depth
+	url = https://github.com/Everloom-129/OmniDepth.git
