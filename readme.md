@@ -109,5 +109,10 @@ This project uses `ml-depth-pro` AND `Segment Anything 2` as submodule. After cl
 git submodule update --init --recursive
 ```
 
+## Acknowledgments
+- DepthPro: [Sharp Monocular Metric Depth in Less Than a Second](https://arxiv.org/abs/2410.02073)
+- DINOX [DINO-X: A Unified Vision Model for Open-World Object Detection and Understanding](https://arxiv.org/abs/2411.14347)
+- Segment Anything 2 [Segment Anything 2](https://arxiv.org/abs/2411.14347)
+
 ## Contact
 For any questions or feedback, please contact the PAL lab team at `tonyw3@seas.upenn.edu`

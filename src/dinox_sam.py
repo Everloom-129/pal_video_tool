@@ -27,7 +27,7 @@ class GroundingDINO:
         return task.result
     
     def get_dinox(self, image_path, input_prompts=None):
-        TEXT_PROMPT = "<prompt_free>" # TODO: fix as prompt-free mode here
+        TEXT_PROMPT = "<prompt_free>" if input_prompts is None else input_prompts
         image_url = self.client.upload_file(image_path)
         task = DinoxTask(
             image_url=image_url,
@@ -81,12 +81,12 @@ class GroundingDINO:
 
         label_annotator = sv.LabelAnnotator()
         annotated_frame = label_annotator.annotate(scene=annotated_frame, detections=detections, labels=labels)
-        cv2.imwrite(os.path.join(output_dir, f"{img_name}_bbox.jpg"), annotated_frame)
+        cv2.imwrite(os.path.join(output_dir, f"frame_{img_name}_bbox.jpg"), annotated_frame)
 
 
         mask_annotator = sv.MaskAnnotator()
         annotated_frame = mask_annotator.annotate(scene=annotated_frame, detections=detections)
-        cv2.imwrite(os.path.join(output_dir, f"{img_name}_mask.jpg"), annotated_frame)
+        cv2.imwrite(os.path.join(output_dir, f"frame_{img_name}_mask.jpg"), annotated_frame)
         
         print(f"Annotated image {img_path} has already been saved to {output_dir}")
         print(f"\033[92mDebug: # Boxes: {len(boxes)}\033[0m")
